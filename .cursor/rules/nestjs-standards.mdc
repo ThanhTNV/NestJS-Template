@@ -1,0 +1,77 @@
+---
+description: NestJS modularity, consistency, and production-grade development standards
+alwaysApply: true
+---
+
+# NestJS Project Standards
+
+## Modular Design
+
+- Every feature gets its own NestJS module: `src/<feature>/` containing `*.controller.ts`, `*.service.ts`, `*.repository.ts`, `*.dto.ts`, `*.entity.ts`.
+- Shared utilities, decorators, pipes, and guards go in `src/common/`.
+- Modules must declare explicit exports — never rely on global scope leaking.
+
+## Layered Architecture
+
+- **Controllers**: request handling, input parsing, response shaping only.
+- **Services**: all business logic lives here.
+- **Repositories**: all persistence/DB interactions isolated here.
+- Never call repositories from controllers or place HTTP logic in services.
+
+## Naming & Structure Conventions
+
+```
+src/
+  common/          # Shared pipes, guards, interceptors, decorators, filters
+  config/          # Centralized configuration files
+  <feature>/
+    <feature>.module.ts
+    <feature>.controller.ts
+    <feature>.controller.spec.ts
+    <feature>.service.ts
+    <feature>.service.spec.ts
+    <feature>.repository.ts
+    dto/
+      create-<feature>.dto.ts
+      update-<feature>.dto.ts
+    entities/
+      <feature>.entity.ts
+test/                        # E2e tests only
+  <feature>.e2e-spec.ts
+```
+
+Use DTOs for **all** request/response validation — never pass raw bodies through.
+
+## Configuration
+
+- Centralize all config in `src/config/` and load via `@nestjs/config` (`ConfigModule`/`ConfigService`).
+- All secrets and environment-specific values come from `.env` — never hardcode them.
+
+## Error Handling & Logging
+
+- Register a global exception filter (`APP_FILTER`) for consistent error responses.
+- Use structured logging (`nestjs-pino` or equivalent) with levels: `debug`, `info`, `warn`, `error`.
+- Never swallow exceptions silently — always log before re-throwing or transforming.
+
+## Testing
+
+- Every service must have a colocated unit test file (`<name>.service.spec.ts`) next to the source.
+- E2e tests for controllers live in `test/` as `<feature>.e2e-spec.ts`.
+- Use `@nestjs/testing` `Test.createTestingModule` for test setup.
+
+## API Documentation
+
+- Annotate all endpoints and DTOs with `@nestjs/swagger` decorators (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiProperty`).
+- Keep the OpenAPI spec in sync — update decorators whenever endpoints change.
+
+## Security & Performance
+
+- Validate all input with `class-validator` + `class-transformer` via `ValidationPipe` (global).
+- Apply guards (`@UseGuards`) for authentication and role-based authorization.
+- Use caching (`@nestjs/cache-manager`) and queues (`@nestjs/bull`) for heavy workloads.
+
+## Repository Hygiene
+
+- Enforce ESLint + Prettier on all commits.
+- CI must pass lint + all tests before merge.
+- Keep `main` branch deployable at all times.
