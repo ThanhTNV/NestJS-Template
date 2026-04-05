@@ -273,7 +273,7 @@ Orchestrates all skills through a complete feature delivery workflow (planning â
 
 ### Complete Feature Delivery Process
 
-```mermaid
+```
 Planning & Design
     â†“
 Implementation (using Code Conventions, Architecture)
